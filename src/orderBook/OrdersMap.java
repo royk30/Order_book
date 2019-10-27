@@ -53,8 +53,12 @@ public class OrdersMap {
 		}
 		
 		if(noChangeOnNoQuantityFields(updatedOrder)) {
-			orderMap.get(orderId).setQuantity(updatedOrder.getQuantity());
+			updateOrderQuantity(orderId, updatedOrder.getQuantity());
 		}
+	}
+	
+	public void updateOrderQuantity(Long id, int quantity) {
+		orderMap.get(id).setQuantity(quantity);
 	}
 	
 	public Double getMax() {
@@ -87,5 +91,9 @@ public class OrdersMap {
 		return currentOrder.getIsBid() == updatedOrder.getIsBid() && currentOrder.getPrice() == updatedOrder.getPrice() && 
 				currentOrder.getTimestamp() == updatedOrder.getTimestamp() && currentOrder.getType() == updatedOrder.getType() && 
 				currentOrder.getVenue() == updatedOrder.getVenue();
+	}
+	
+	public int getNumberOfOrders() {
+		return orderMap.size();
 	}
 }

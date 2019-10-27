@@ -1,8 +1,10 @@
 package orderBook;
 
+import java.util.Set;
+
 public class OrderBook {
-	private OrdersMap bids;
-	private OrdersMap asks;
+	private OrdersMap bids = new OrdersMap();
+	private OrdersMap asks  = new OrdersMap();
 	
 	public void add_order(Order order) {
 		if(order.getIsBid()) {
@@ -39,11 +41,79 @@ public class OrderBook {
 		return asks.getMin();
 	}
 	
+	public void process_order(Order order) {
+		if(order.getType().equals(OrderType.LIMIT)) {
+			processLimitOrder(order);
+		}
+		else {
+			processMarketOrder(order);
+		}
+	}
+	
 	private void processMarketOrder(Order order) {
 		int quantity = order.getQuantity();
 		
 		if(order.getIsBid()) {
-			
+			while(quantity > 0 && asks.getNumberOfOrders() > 0) {
+				quantity = processOrder(asks.getMinSet(), quantity, order);
+			}
 		}
+		else {
+			while(quantity > 0 && bids.getNumberOfOrders() > 0) {
+				quantity = processOrder(bids.getMaxSet(), quantity, order);
+			}			
+		}
+	}
+	
+	private void processLimitOrder(Order order) {
+		int quantity = order.getQuantity();
+		
+		if(order.getIsBid()) {
+			while(asks.getNumberOfOrders() > 0 && quantity > 0 && order.getPrice() >= asks.getMin()) {
+				quantity = processOrder(asks.getMinSet(), quantity, order);
+			}
+			
+			if(quantity > 0) {
+				order.setQuantity(quantity);
+				bids.insert(order);
+			}
+		}
+		else {
+			while(bids.getNumberOfOrders() > 0 && quantity > 0 && order.getPrice() >= bids.getMax()) {
+				quantity = processOrder(bids.getMaxSet(), quantity, order);
+			}
+			
+			if(quantity > 0) {
+				order.setQuantity(quantity);
+				asks.insert(order);
+			}			
+		}
+	}
+	
+	private int processOrder (Set<Order> orders, int remainQuantity, Order currentOrder) {
+		while((orders.size() > 0) && (remainQuantity > 0)) {
+			Order order = orders.iterator().next();
+			if(remainQuantity < order.getQuantity()) {
+				if(currentOrder.getIsBid()) {
+					bids.updateOrderQuantity(order.getId(), remainQuantity - currentOrder.getQuantity());
+				}
+				else {
+					asks.updateOrderQuantity(order.getId(), remainQuantity - currentOrder.getQuantity());
+				}
+				remainQuantity = 0;
+			}
+			else {
+				remainQuantity -= order.getQuantity();
+				
+				if(currentOrder.getIsBid()) {
+					bids.remove(order);
+				}
+				else {
+					asks.remove(order);
+				}
+			}
+		}
+		return remainQuantity;
+		
 	}
 }
