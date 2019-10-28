@@ -9,8 +9,11 @@ public class Order {
 	private String venue;
 	private OrderType type;
 	
+	public Order() {
+		
+	}
+	
 	public Order(Long id, Long timestamp, Boolean isBid, double price, int quantity, String venue, OrderType type) {
-		super();
 		this.id = id;
 		this.timestamp = timestamp;
 		this.isBid = isBid;

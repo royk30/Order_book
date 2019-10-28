@@ -38,13 +38,13 @@ public class OrdersMap {
 		orderMap.remove(orderId);
 		
 		double price = order.getPrice();
-		priceTree.get(price).remove(orderId);
+		priceTree.get(price).remove(order);
 		if(priceTree.get(price).size() == 0) {
 			priceTree.remove(price);
 		}
 	}
 	
-	public void update(Order updatedOrder) {
+	public void update(Order updatedOrder) throws Exception {
 		Long orderId = updatedOrder.getId();
 		
 		if(!orderMap.containsKey(orderId)) {
@@ -54,6 +54,8 @@ public class OrdersMap {
 		
 		if(noChangeOnNoQuantityFields(updatedOrder)) {
 			updateOrderQuantity(orderId, updatedOrder.getQuantity());
+		} else {
+			throw new Exception("Allow to update only quantity");
 		}
 	}
 	
@@ -95,5 +97,13 @@ public class OrdersMap {
 	
 	public int getNumberOfOrders() {
 		return orderMap.size();
+	}
+	
+	public Order getOrderById(Long orderId) {
+		if(orderMap.containsKey(orderId)) {
+			return orderMap.get(orderId);
+		}
+		
+		return null;
 	}
 }

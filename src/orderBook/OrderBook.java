@@ -15,7 +15,7 @@ public class OrderBook {
 		}
 	}
 	
-	public void modify_order(Order order) {
+	public void modify_order(Order order) throws Exception {
 		if(order.getIsBid()) {
 			bids.update(order);
 		}
@@ -95,10 +95,10 @@ public class OrderBook {
 			Order order = orders.iterator().next();
 			if(remainQuantity < order.getQuantity()) {
 				if(currentOrder.getIsBid()) {
-					bids.updateOrderQuantity(order.getId(), remainQuantity - currentOrder.getQuantity());
+					asks.updateOrderQuantity(order.getId(), order.getQuantity() - remainQuantity);
 				}
 				else {
-					asks.updateOrderQuantity(order.getId(), remainQuantity - currentOrder.getQuantity());
+					bids.updateOrderQuantity(order.getId(), order.getQuantity() - remainQuantity);
 				}
 				remainQuantity = 0;
 			}
@@ -106,14 +106,22 @@ public class OrderBook {
 				remainQuantity -= order.getQuantity();
 				
 				if(currentOrder.getIsBid()) {
-					bids.remove(order);
+					asks.remove(order);
 				}
 				else {
-					asks.remove(order);
+					bids.remove(order);
 				}
 			}
 		}
 		return remainQuantity;
 		
+	}
+
+	public OrdersMap getBids() {
+		return bids;
+	}
+
+	public OrdersMap getAsks() {
+		return asks;
 	}
 }
